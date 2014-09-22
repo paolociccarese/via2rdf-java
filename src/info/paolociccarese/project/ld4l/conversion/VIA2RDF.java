@@ -58,7 +58,7 @@ public class VIA2RDF {
 			SAXParser saxParser = spf.newSAXParser();
 			XMLReader xmlReader = saxParser.getXMLReader();
 			xmlReader.setContentHandler(new OaiPmhViaSaxHandler());
-			xmlReader.parse(convertToFileURL("data/VIA_recordIdentifier_HUAM211406.via.xml"));
+			xmlReader.parse(convertToFileURL("data/VIA_recordIdentifier_HUAM92610.via.xml"));
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

@@ -95,7 +95,7 @@ public class ViaSaxHandler extends DefaultHandler {
 			if(viaWork) {
 				if (qName.equalsIgnoreCase("Image")) {
 					for(int i=0; i<attributes.getLength(); i++) {
-						logger.info("VIA|Image|" + attributes.getQName(i) + "=" + attributes.getValue(i));
+						logger.info("VIA|Work|Image|" + attributes.getQName(i) + "=" + attributes.getValue(i));
 					}	
 					viaWorkImage = true;
 				} else if (qName.equalsIgnoreCase("Title")) {
