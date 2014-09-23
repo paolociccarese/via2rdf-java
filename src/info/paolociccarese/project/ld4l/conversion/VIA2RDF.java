@@ -1,5 +1,3 @@
-package info.paolociccarese.project.ld4l.conversion;
-
 /*
 * Copyright 2014 Paolo Ciccarese
 *
@@ -20,6 +18,8 @@ package info.paolociccarese.project.ld4l.conversion;
 * specific language governing permissions and limitations
 * under the License.
 */
+package info.paolociccarese.project.ld4l.conversion;
+
 import info.paolociccarese.project.ld4l.conversion.via.OaiPmhViaSaxHandler;
 
 import java.io.File;

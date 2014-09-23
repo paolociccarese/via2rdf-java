@@ -66,6 +66,12 @@ public class ViaSaxHandler extends DefaultHandler {
 	boolean viaWorkStyle = false;
 	boolean viaWorkStyleTerm = false;
 	
+	boolean viaWorkCulture = false;
+	boolean viaWorkCultureTerm = false;
+	
+	boolean viaWorkRepository = false;
+	boolean viaWorkRepositoryName = false;
+	
 	boolean viaWorkProduction = false;
 	boolean viaWorkPlaceOfProduction = false;
 	boolean viaWorkPlace = false;
@@ -108,6 +114,10 @@ public class ViaSaxHandler extends DefaultHandler {
 					viaWorkTopic = true;
 				} else if (qName.equalsIgnoreCase("style")) {
 					viaWorkStyle = true;
+				} else if (qName.equalsIgnoreCase("culture")) {
+					viaWorkCulture = true;
+				} else if (qName.equalsIgnoreCase("repository")) {
+					viaWorkRepository = true;
 				} else if (qName.equalsIgnoreCase("production")) {
 					viaWorkProduction = true;
 				} else if (qName.equalsIgnoreCase("dimensions")) {
@@ -156,6 +166,18 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkStyle) {
 					if (qName.equalsIgnoreCase("term")) {
 						viaWorkStyleTerm = true;
+					}
+				}
+				
+				if(viaWorkCulture) {
+					if (qName.equalsIgnoreCase("term")) {
+						viaWorkCultureTerm = true;
+					}
+				}
+				
+				if(viaWorkRepository) {
+					if (qName.equalsIgnoreCase("repositoryName")) {
+						viaWorkRepositoryName = true;
 					}
 				}
 				
@@ -213,6 +235,10 @@ public class ViaSaxHandler extends DefaultHandler {
 					viaWorkTopic = false;
 				} else if (qName.equalsIgnoreCase("style")) {
 					viaWorkStyle = false;
+				} else if (qName.equalsIgnoreCase("culture")) {
+					viaWorkCulture = false;
+				} else if (qName.equalsIgnoreCase("repository")) {
+					viaWorkRepository = false;
 				} else if (qName.equalsIgnoreCase("production")) {
 					viaWorkProduction = false;
 				} else if (qName.equalsIgnoreCase("dimensions")) {
@@ -267,7 +293,7 @@ public class ViaSaxHandler extends DefaultHandler {
 						logger.info("VIA|Work|Creator|Dates=" + valueBuffer.toString().trim());
 						viaWorkCreatorDates = false;
 					} else if (qName.equalsIgnoreCase("nationality")) {
-						logger.info("VIA|WorkCreator|Nationality=" + valueBuffer.toString().trim());
+						logger.info("VIA|Work|Creator|Nationality=" + valueBuffer.toString().trim());
 						viaWorkCreatorNationality = false;
 					}
 				}
@@ -283,6 +309,20 @@ public class ViaSaxHandler extends DefaultHandler {
 					if (qName.equalsIgnoreCase("term")) {
 						logger.info("VIA|Work|Style|Term=" + valueBuffer.toString().trim());
 						viaWorkStyleTerm = false;
+					}
+				}
+				
+				if(viaWorkCulture) {
+					if (qName.equalsIgnoreCase("term")) {
+						logger.info("VIA|Work|Culture|Term=" + valueBuffer.toString().trim());
+						viaWorkCultureTerm = false;
+					}
+				}
+				
+				if(viaWorkRepository) {
+					if (qName.equalsIgnoreCase("repositoryName")) {
+						logger.info("VIA|Work|Repository|Name=" + valueBuffer.toString().trim());
+						viaWorkRepositoryName = false;
 					}
 				}
 				
