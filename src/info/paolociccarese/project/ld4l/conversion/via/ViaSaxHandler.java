@@ -20,6 +20,10 @@
 */
 package info.paolociccarese.project.ld4l.conversion.via;
 
+import info.paolociccarese.project.jsondp.java.core.JsonDpArray;
+import info.paolociccarese.project.jsondp.java.core.JsonDpObject;
+import info.paolociccarese.project.ld4l.conversion.utils.JsonDpUtils;
+
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -33,6 +37,14 @@ public class ViaSaxHandler extends DefaultHandler {
 	private static Logger logger = Logger.getLogger(ViaSaxHandler.class.getName());
 	
 	StringBuffer valueBuffer = new StringBuffer();
+	
+	//ProJsonUtils proJsonUtils;
+	
+	JsonDpObject viaRecord;
+	JsonDpObject viaRecordWork;
+	JsonDpObject creator;
+	JsonDpArray notes;
+	JsonDpArray workTypes;
 	
 	boolean viaDocument = false;
 	boolean viaRecordId = false;
@@ -76,6 +88,12 @@ public class ViaSaxHandler extends DefaultHandler {
 	boolean viaWorkPlaceOfProduction = false;
 	boolean viaWorkPlace = false;
 	
+	protected IResultsHandler resultsHandler;
+	
+	public ViaSaxHandler(IResultsHandler resultsHandler) {
+		this.resultsHandler = resultsHandler;
+	}
+	
 	public void startDocument() throws SAXException {
 		logger.info("VIA|Start document");
 	}
@@ -87,6 +105,8 @@ public class ViaSaxHandler extends DefaultHandler {
 	public void startElement(String uri, String localName, String qName,
 			Attributes attributes) throws SAXException {
 		
+		if(viaRecord==null) viaRecord = new JsonDpObject();
+		
 		valueBuffer = new StringBuffer();
 		
 		if(viaDocument) {
@@ -95,20 +115,30 @@ public class ViaSaxHandler extends DefaultHandler {
 			if (qName.equalsIgnoreCase("RecordId")) {
 				viaRecordId = true;
 			} else if (qName.equalsIgnoreCase("work")) {
+				viaRecordWork = new JsonDpObject();
+				workTypes = new JsonDpArray();
+				notes = new JsonDpArray();
 				viaWork = true;
 			}
 			
 			if(viaWork) {
 				if (qName.equalsIgnoreCase("Image")) {
+					JsonDpObject image = new JsonDpObject(); 
+							
 					for(int i=0; i<attributes.getLength(); i++) {
 						logger.info("VIA|Work|Image|" + attributes.getQName(i) + "=" + attributes.getValue(i));
+						if(attributes.getQName(i).equals("xlink:href")) 
+							image.put("via:image", attributes.getValue(i), JsonDpUtils.getProvenance());
+						else image.put("via:" + attributes.getQName(i) , attributes.getValue(i), JsonDpUtils.getProvenance());
 					}	
+					viaRecordWork.put("via:image", image, JsonDpUtils.getProvenance());
 					viaWorkImage = true;
 				} else if (qName.equalsIgnoreCase("Title")) {
 					viaWorkTitle = true;
 				} else if (qName.equalsIgnoreCase("itemIdentifier")) {
 					viaWorkItemIdentifier = true;
 				} else if (qName.equalsIgnoreCase("creator")) {
+					creator = new JsonDpObject();
 					viaWorkCreator = true;
 				} else if (qName.equalsIgnoreCase("topic")) {
 					viaWorkTopic = true;
@@ -135,10 +165,18 @@ public class ViaSaxHandler extends DefaultHandler {
 				}
 				
 				if(viaWorkImage) {
-					if (qName.equalsIgnoreCase("thumbnail")) {						
+					if (qName.equalsIgnoreCase("thumbnail")) {				
+						
+						JsonDpObject image = new JsonDpObject(); 
+						
 						for(int i=0; i<attributes.getLength(); i++) {
-							logger.info("VIA|Work|Thumbnail=" + attributes.getValue(i));
-						}						
+							logger.info("VIA|Work|Thumbnail|" + attributes.getQName(i) + "=" + attributes.getValue(i));
+							if(attributes.getQName(i).equals("xlink:href")) 
+								image.put("via:url", attributes.getValue(i), JsonDpUtils.getProvenance());
+							else image.put("via:" + attributes.getQName(i) , attributes.getValue(i), JsonDpUtils.getProvenance());
+						}	
+						viaRecordWork.put("via:thumbnail", image, JsonDpUtils.getProvenance());
+					
 						viaWorkImageThumbnail = true;
 					}
 				}
@@ -214,11 +252,23 @@ public class ViaSaxHandler extends DefaultHandler {
 			
 			if (qName.equalsIgnoreCase("viaRecord")) {
 				logger.debug("VIA|End Via document: " + qName);
+				
+				resultsHandler.notifyResult(viaRecord);
+				
 				viaDocument = false;
 			} else if (qName.equalsIgnoreCase("RecordId")) {	
 				logger.info("VIA|RecordId=" + valueBuffer.toString().trim());
+				
+				viaRecord.put("via:recordId", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+				
 				viaRecordId = false;
 			} else if (qName.equalsIgnoreCase("work")) {
+				
+				viaRecord.put("via:work", viaRecordWork, JsonDpUtils.getProvenance());
+				
+				if(notes.size()>0) viaRecordWork.put("via:notes", notes, JsonDpUtils.getProvenance());
+				if(workTypes.size()>0) viaRecordWork.put("via:workTypes", workTypes, JsonDpUtils.getProvenance());
+				
 				viaWork = false;
 			}
 			
@@ -230,6 +280,7 @@ public class ViaSaxHandler extends DefaultHandler {
 				} else if (qName.equalsIgnoreCase("itemIdentifier")) {
 					viaWorkItemIdentifier = false;
 				} else if (qName.equalsIgnoreCase("creator")) {
+					viaRecordWork.put("via:creator", creator, JsonDpUtils.getProvenance());
 					viaWorkCreator = false;
 				} else if (qName.equalsIgnoreCase("topic")) {
 					viaWorkTopic = false;
@@ -243,21 +294,39 @@ public class ViaSaxHandler extends DefaultHandler {
 					viaWorkProduction = false;
 				} else if (qName.equalsIgnoreCase("dimensions")) {
 					logger.info("VIA|Work|Dimensions=" + valueBuffer.toString().trim());
+					
+					viaRecordWork.put("via:dimension", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkDimensions = false;
 				} else if (qName.equalsIgnoreCase("freedate")) {
 					logger.info("VIA|Work|FreeDate=" + valueBuffer.toString().trim());
+					
+					viaRecordWork.put("via:freedate", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkFreeDate = false;
 				} else if (qName.equalsIgnoreCase("workType")) {
 					logger.info("VIA|Work|Type=" + valueBuffer.toString().trim());
+					
+					workTypes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkType = false;
 				} else if (qName.equalsIgnoreCase("materials")) {
 					logger.info("VIA|Work|Materials=" + valueBuffer.toString().trim());
+					
+					viaRecordWork.put("via:materials", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkMaterial = false;
 				} else if (qName.equalsIgnoreCase("notes")) {
 					logger.info("VIA|Work|Notes=" + valueBuffer.toString().trim());
+					
+					notes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkNotes = false;
 				} else if (qName.equalsIgnoreCase("copyright")) {
 					logger.info("VIA|Work|Copyright=" + valueBuffer.toString().trim());
+					
+					viaRecordWork.put("via:copyright", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					viaWorkCopyright = false;
 				}
 				
@@ -288,12 +357,24 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkCreator) {
 					if (qName.equalsIgnoreCase("nameElement")) {
 						logger.info("VIA|Work|Creator|NameElement=" + valueBuffer.toString().trim());
+						
+						creator.put("via:nameElement", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						//viaRecordWork.put("via:creator", creator);
+						
 						viaWorkCreatorNameElement = false;
 					} else if (qName.equalsIgnoreCase("dates")) {
 						logger.info("VIA|Work|Creator|Dates=" + valueBuffer.toString().trim());
+						
+						creator.put("via:dates", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						//viaRecordWork.put("via:creator", creator);
+						
 						viaWorkCreatorDates = false;
 					} else if (qName.equalsIgnoreCase("nationality")) {
 						logger.info("VIA|Work|Creator|Nationality=" + valueBuffer.toString().trim());
+						
+						creator.put("via:nationality", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						//viaRecordWork.put("via:creator", creator);
+						
 						viaWorkCreatorNationality = false;
 					}
 				}
@@ -301,6 +382,11 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkTopic) {
 					if (qName.equalsIgnoreCase("term")) {
 						logger.info("VIA|Work|Topic|Term=" + valueBuffer.toString().trim());
+						
+						JsonDpObject topic = new JsonDpObject(); 
+						topic.put("via:term", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						viaRecordWork.put("via:topic", topic, JsonDpUtils.getProvenance());
+						
 						viaWorkTopicTerm = false;
 					}
 				}
@@ -308,6 +394,11 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkStyle) {
 					if (qName.equalsIgnoreCase("term")) {
 						logger.info("VIA|Work|Style|Term=" + valueBuffer.toString().trim());
+						
+						JsonDpObject style = new JsonDpObject(); 
+						style.put("via:term", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						viaRecordWork.put("via:style", style, JsonDpUtils.getProvenance());
+						
 						viaWorkStyleTerm = false;
 					}
 				}
@@ -315,6 +406,11 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkCulture) {
 					if (qName.equalsIgnoreCase("term")) {
 						logger.info("VIA|Work|Culture|Term=" + valueBuffer.toString().trim());
+						
+						JsonDpObject culture = new JsonDpObject(); 
+						culture.put("via:term", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						viaRecordWork.put("via:culture", culture, JsonDpUtils.getProvenance());
+						
 						viaWorkCultureTerm = false;
 					}
 				}
@@ -322,20 +418,30 @@ public class ViaSaxHandler extends DefaultHandler {
 				if(viaWorkRepository) {
 					if (qName.equalsIgnoreCase("repositoryName")) {
 						logger.info("VIA|Work|Repository|Name=" + valueBuffer.toString().trim());
+						
+						JsonDpObject repository = new JsonDpObject(); 
+						repository.put("via:name", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+						viaRecordWork.put("via:repository", repository, JsonDpUtils.getProvenance());
+						
 						viaWorkRepositoryName = false;
 					}
 				}
 				
-				if(viaWorkProduction) {
-					if (qName.equalsIgnoreCase("placeOfProduction")) {
-						viaWorkPlaceOfProduction = false;
-					}
-					
+				if(viaWorkProduction) {					
 					if(viaWorkPlaceOfProduction) {
 						if (qName.equalsIgnoreCase("place")) {
 							logger.info("VIA|Work|Place=" + valueBuffer.toString().trim());
+							
+							JsonDpObject culture = new JsonDpObject(); 
+							culture.put("via:term", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+							viaRecordWork.put("via:place", culture, JsonDpUtils.getProvenance());
+							
 							viaWorkPlace = false;
 						}	
+					}
+					
+					if (qName.equalsIgnoreCase("placeOfProduction")) {
+						viaWorkPlaceOfProduction = false;
 					}
 				}
 			}

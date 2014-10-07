@@ -20,6 +20,8 @@
 */
 package info.paolociccarese.project.ld4l.conversion;
 
+import info.paolociccarese.project.jsondp.java.core.JsonDpObject;
+import info.paolociccarese.project.ld4l.conversion.via.IResultsHandler;
 import info.paolociccarese.project.ld4l.conversion.via.OaiPmhViaSaxHandler;
 
 import java.io.File;
@@ -38,7 +40,7 @@ import org.xml.sax.XMLReader;
 /**
  * @author Dr. Paolo Ciccarese
  */
-public class VIA2RDF {
+public class VIA2RDF implements IResultsHandler {
 
 	public static void main(String[] args) throws SecurityException,
 			IOException {
@@ -57,8 +59,8 @@ public class VIA2RDF {
 		try {
 			SAXParser saxParser = spf.newSAXParser();
 			XMLReader xmlReader = saxParser.getXMLReader();
-			xmlReader.setContentHandler(new OaiPmhViaSaxHandler());
-			xmlReader.parse(convertToFileURL("data/VIA_recordIdentifier_HUAM92610.via.xml"));
+			xmlReader.setContentHandler(new OaiPmhViaSaxHandler(this));
+			xmlReader.parse(convertToFileURL("data/VIA_recordIdentifier_HUAM211406.via.xml"));
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -81,5 +83,11 @@ public class VIA2RDF {
 			path = "/" + path;
 		}
 		return "file:" + path;
+	}
+
+	@Override
+	public void notifyResult(JsonDpObject result) {
+		System.out.println(result.toString());
+		System.out.println(result.toStringWithProvenance());
 	}
 }

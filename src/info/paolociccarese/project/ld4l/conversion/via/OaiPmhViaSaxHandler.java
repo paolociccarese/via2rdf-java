@@ -34,6 +34,10 @@ public class OaiPmhViaSaxHandler extends ViaSaxHandler {
 
 	boolean oaiDocument = false;
 
+	public OaiPmhViaSaxHandler(IResultsHandler resultsHandler) {
+		super(resultsHandler);
+	}
+	
 	public void startDocument() throws SAXException {
 		logger.info("OaiPmh|Start document");
 	}
