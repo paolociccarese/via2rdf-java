@@ -20,12 +20,11 @@
 */
 package info.paolociccarese.project.ld4l.conversion.via;
 
-import info.paolociccarese.project.jsondp.java.core.JsonDpObject;
 
 /**
  *  @author Dr. Paolo Ciccarese
  */
 public interface IResultsHandler {
 
-	public void notifyResult(JsonDpObject result);
+	public void notifyResult(Object result);
 }

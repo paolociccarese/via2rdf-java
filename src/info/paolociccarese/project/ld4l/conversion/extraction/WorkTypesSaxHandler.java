@@ -18,7 +18,10 @@
 * specific language governing permissions and limitations
 * under the License.
 */
-package info.paolociccarese.project.ld4l.conversion.via;
+package info.paolociccarese.project.ld4l.conversion.extraction;
+
+import info.paolociccarese.project.ld4l.conversion.via.IResultsHandler;
+import info.paolociccarese.project.ld4l.conversion.via.ViaSaxHandler;
 
 import org.apache.log4j.Logger;
 import org.xml.sax.Attributes;
@@ -27,14 +30,14 @@ import org.xml.sax.SAXException;
 /**
  *  @author Dr. Paolo Ciccarese
  */
-public class OaiPmhViaSaxHandler extends ViaSaxHandler {
+public class WorkTypesSaxHandler extends ViaSaxHandler {
 
 	private static Logger logger = Logger
-			.getLogger(OaiPmhViaSaxHandler.class.getName());
+			.getLogger(WorkTypesSaxHandler.class.getName());
 
 	boolean oaiDocument = false;
 
-	public OaiPmhViaSaxHandler(IResultsHandler resultsHandler) {
+	public WorkTypesSaxHandler(IResultsHandler resultsHandler) {
 		super(resultsHandler);
 	}
 	

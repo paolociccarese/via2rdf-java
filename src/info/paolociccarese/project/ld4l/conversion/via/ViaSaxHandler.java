@@ -40,13 +40,13 @@ public class ViaSaxHandler extends DefaultHandler {
 	
 	//ProJsonUtils proJsonUtils;
 	
-	JsonDpObject viaRecord;
+	protected JsonDpObject viaRecord;
 	JsonDpObject viaRecordWork;
 	JsonDpObject creator;
 	JsonDpArray notes;
 	JsonDpArray workTypes;
 	
-	boolean viaDocument = false;
+	public boolean viaDocument = false;
 	boolean viaRecordId = false;
 	boolean viaWork = false;
 	
@@ -253,7 +253,7 @@ public class ViaSaxHandler extends DefaultHandler {
 			if (qName.equalsIgnoreCase("viaRecord")) {
 				logger.debug("VIA|End Via document: " + qName);
 				
-				resultsHandler.notifyResult(viaRecord);
+				//resultsHandler.notifyResult(viaRecord);
 				
 				viaDocument = false;
 			} else if (qName.equalsIgnoreCase("RecordId")) {	
@@ -307,7 +307,12 @@ public class ViaSaxHandler extends DefaultHandler {
 				} else if (qName.equalsIgnoreCase("workType")) {
 					logger.info("VIA|Work|Type=" + valueBuffer.toString().trim());
 					
-					workTypes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					JsonDpObject o = new JsonDpObject();
+					o.put("via:text", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					workTypes.add(o);
+					
+					//workTypes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					
 					
 					viaWorkType = false;
 				} else if (qName.equalsIgnoreCase("materials")) {
@@ -319,7 +324,11 @@ public class ViaSaxHandler extends DefaultHandler {
 				} else if (qName.equalsIgnoreCase("notes")) {
 					logger.info("VIA|Work|Notes=" + valueBuffer.toString().trim());
 					
-					notes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					JsonDpObject o = new JsonDpObject();
+					o.put("via:text", valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
+					notes.add(o);
+					
+					//notes.add(valueBuffer.toString().trim(), JsonDpUtils.getProvenance());
 					
 					viaWorkNotes = false;
 				} else if (qName.equalsIgnoreCase("copyright")) {
