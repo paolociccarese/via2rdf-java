@@ -13,37 +13,37 @@ import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
+import org.slf4j.LoggerFactory;
 
 public class ViaRecordConversionPipeline extends APipeline {
 	
+	private final org.slf4j.Logger log = LoggerFactory.getLogger(ViaRecordConversionPipeline.class);
+	
 	private static final String NAME = "ViaRecordConversionPipeline";
 	
-	public static void main(String[] args) {
-	
-		// JDK Logger configuration
-		// Logger log = Logger.getLogger("info.paolociccarese.project.dpf.java");
-		// log.setLevel(Level.ALL);
-		
+	private static void initializeLog4j() {
 		// Log4j Logger configuration
 		Logger rootLogger = Logger.getRootLogger();
-		rootLogger.setLevel(Level.INFO);
+		rootLogger.setLevel(Level.DEBUG);
 		
 		//Define log pattern layout
 		PatternLayout layout = new PatternLayout("%d{ISO8601} [%t] %-5p %c %x - %m%n");
 		 
 		//Add console appender to root logger
 		rootLogger.addAppender(new ConsoleAppender(layout));
-		
-		//Map<String, String> parameters = new HashMap<String, String>();
-		//parameters.put("directory", "data/via-records/via_xml_records_HUAM1");
-		
-		
+	}
+	
+	public static void main(String[] args) {
+	
+		initializeLog4j();
 		
 		ViaRecordConversionPipeline pipeline = new ViaRecordConversionPipeline();
 		pipeline.start(new HashMap<String, Object>(), null);
 	}
 
 	public ViaRecordConversionPipeline() {
+		log.debug("Pipeline definition started");
+		
 		IStage stage1 = new Stage("1", new ReadViaRecordCommand(this));
 		stage1.setExecutable(true);
 		_stages.add(stage1);
@@ -55,6 +55,8 @@ public class ViaRecordConversionPipeline extends APipeline {
 		IStage stage3 = new Stage("3", new PlaceExtractionCommand(this));
 		stage3.setExecutable(true);
 		_stages.add(stage3);
+		
+		log.info("Pipeline definition completed with " + _stages.size() + " stage(s)");
 	}
 	
 
