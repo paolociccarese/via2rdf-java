@@ -13,7 +13,7 @@ public class PlaceExtractionCommand implements IStageCommand, IResultsHandler {
 	private IStage _parentStage;
 	private IStageListener _listener;
 	
-	private Map<String, String> _parameters;
+	private Map<String, Object> _parameters;
 	
 	public PlaceExtractionCommand(IStageListener listener) {
 		_listener = listener;
@@ -25,7 +25,7 @@ public class PlaceExtractionCommand implements IStageCommand, IResultsHandler {
 	}
 
 	@Override
-	public void run(IStage parentStage, Map<String, String> parameters, Object data) {
+	public void run(IStage parentStage, Map<String, Object> parameters, Object data) {
 		_parentStage = parentStage;
 		_parameters = parameters;
 		

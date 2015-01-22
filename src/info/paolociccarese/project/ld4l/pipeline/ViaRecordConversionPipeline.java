@@ -40,7 +40,7 @@ public class ViaRecordConversionPipeline extends APipeline {
 		
 		
 		ViaRecordConversionPipeline pipeline = new ViaRecordConversionPipeline();
-		pipeline.start(new HashMap<String, String>(), null);
+		pipeline.start(new HashMap<String, Object>(), null);
 	}
 
 	public ViaRecordConversionPipeline() {

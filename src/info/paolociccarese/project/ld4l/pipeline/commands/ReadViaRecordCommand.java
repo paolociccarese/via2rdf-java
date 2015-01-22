@@ -23,14 +23,14 @@ public class ReadViaRecordCommand implements IStageCommand, IResultsHandler {
 	IStageListener _listener;
 	
 	IStage _parentStage;
-	Map<String, String> _parameters;
+	Map<String, Object> _parameters;
 	
 	public ReadViaRecordCommand(IStageListener listener) {
 		_listener = listener;
 	}
 	
 	@Override
-	public void run(IStage parentStage, Map<String, String> parameters, Object data) {
+	public void run(IStage parentStage, Map<String, Object> parameters, Object data) {
 		_parentStage = parentStage;
 		_parameters = parameters;
 		SAXParserFactory spf = SAXParserFactory.newInstance();
@@ -39,7 +39,7 @@ public class ReadViaRecordCommand implements IStageCommand, IResultsHandler {
 			SAXParser saxParser = spf.newSAXParser();
 			XMLReader xmlReader = saxParser.getXMLReader();
 			xmlReader.setContentHandler(new OaiPmhViaSaxHandler(this));
-			xmlReader.parse(convertToFileURL(parameters.get("file")));
+			xmlReader.parse(convertToFileURL(parameters.get("file").toString()));
 		} catch (ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

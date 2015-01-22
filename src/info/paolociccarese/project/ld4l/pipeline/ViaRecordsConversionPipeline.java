@@ -32,7 +32,7 @@ public class ViaRecordsConversionPipeline extends APipeline {
 		//Add console appender to root logger
 		rootLogger.addAppender(new ConsoleAppender(layout));
 		
-		Map<String, String> params = new HashMap<String, String>();
+		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("folders", "data/via-records/via_xml_records_HUAM1");
 		
 		ViaRecordsConversionPipeline pipeline = new ViaRecordsConversionPipeline();

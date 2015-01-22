@@ -8,10 +8,13 @@ import info.paolociccarese.project.jsondp.java.core.JsonDpObject;
 import info.paolociccarese.project.ld4l.conversion.via.IResultsHandler;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,7 +29,7 @@ public class WorkTypesExtractionCommand implements IStageCommand, IResultsHandle
 	private IStage _parentStage;
 	private IStageListener _listener;
 	
-	private Map<String, String> _parameters;
+	private Map<String, Object> _parameters;
 	private Map<String, String> _cachedTypes;
 	
 	public WorkTypesExtractionCommand(IStageListener listener) {
@@ -39,7 +42,7 @@ public class WorkTypesExtractionCommand implements IStageCommand, IResultsHandle
 	}
 
 	@Override
-	public void run(IStage parentStage, Map<String, String> parameters, Object data) {
+	public void run(IStage parentStage, Map<String, Object> parameters, Object data) {
 		_parentStage = parentStage;
 		_parameters = parameters;			
 		
@@ -62,8 +65,40 @@ public class WorkTypesExtractionCommand implements IStageCommand, IResultsHandle
 
 					if(_cachedTypes.containsKey(((JsonDpObject)typeAsString).get("via:text").toString())) {
 						log.info("Type found " + ((JsonDpObject)typeAsString).get("via:text").toString());
+						
+						JsonDpObject typeJsonObject = new JsonDpObject();
+						typeJsonObject.put("@id", _cachedTypes.get(((JsonDpObject)typeAsString).get("via:text").toString()), provenance2);
+						typeJsonObject.put("label", ((JsonDpObject)typeAsString).get("via:text").toString(), provenance2);
+						
+						JsonDpObject replacement = ((JsonDpObject)typeAsString);
+						replacement.put("skos:exactMatch", typeJsonObject, provenance1);
+						
+						((JsonDpArray)types).replace(i, replacement);
+						
+						Writer output;
+						try {
+							output = new BufferedWriter(new FileWriter("output/found-types.txt", true));
+							output.append(((JsonDpObject)typeAsString).get("via:text").toString());
+							output.append("\n");
+							output.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
 					} else {
 						log.warn("Type not found " + ((JsonDpObject)typeAsString).get("via:text").toString());
+						
+						Writer output;
+						try {
+							output = new BufferedWriter(new FileWriter("output/missing-types.txt", true));
+							output.append(((JsonDpObject)typeAsString).get("via:text").toString());
+							output.append("\n");
+							output.close();
+						} catch (IOException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						} 
+						
 					}
 					
 					/*

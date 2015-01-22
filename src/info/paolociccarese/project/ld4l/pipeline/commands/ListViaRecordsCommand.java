@@ -22,31 +22,33 @@ public class ListViaRecordsCommand implements IStageCommand, IResultsHandler {
 	IStageListener _listener;
 	
 	IStage _parentStage;
-	Map<String, String> _parameters;
+	Map<String, Object> _parameters;
 	
 	public ListViaRecordsCommand(IStageListener listener) {
 		_listener = listener;
 	}
 	
 	@Override
-	public void run(IStage parentStage, Map<String, String> parameters, Object data) {
+	public void run(IStage parentStage, Map<String, Object> parameters, Object data) {
 		_parentStage = parentStage;
 		_parameters = parameters;
 		
-		String folders = parameters.get("folders");
+		String folders = parameters.get("folders").toString();
 		log.info("Reading folders: " + folders);
 		
 		List<String> files = new ArrayList<String>();
 		listFilesForFolder(new File(folders), files);
 		
 		for(String file: files) {
-			Map<String, String> params = new HashMap<String, String>();
+			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("file", file);
 			
 			log.info("Reading file: " + file);
 			
 			ViaRecordConversionPipeline pipeline = new ViaRecordConversionPipeline();
 			pipeline.start(params, null);
+			
+			break;
 		}
 	}
 	
