@@ -35,5 +35,7 @@ public class PlaceExtractionCommand implements IStageCommand, IResultsHandler {
 			//System.out.println(types.getClass().getName());
 			//System.out.println(((JsonDpObject)types).toJsonWithProvenanceString());
 		}
+		
+		notifyResult(data);
 	}
 }
