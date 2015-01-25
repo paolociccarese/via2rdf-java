@@ -20,14 +20,14 @@ import java.util.Map;
 /**
  * @author Dr. Paolo Ciccarese
  */
-public class WriteViaRecordCommand implements IStageCommand, IResultsHandler {
+public class ConvertViaRecordCommand implements IStageCommand, IResultsHandler {
 
 	IStageListener _listener;
 	
 	IStage _parentStage;
 	Map<String, Object> _parameters;
 	
-	public WriteViaRecordCommand(IStageListener listener) {
+	public ConvertViaRecordCommand(IStageListener listener) {
 		_listener = listener;
 	}
 	

@@ -3,11 +3,14 @@ package info.paolociccarese.project.ld4l.pipeline;
 import info.paolociccarese.project.dpf.java.core.APipeline;
 import info.paolociccarese.project.dpf.java.core.IStage;
 import info.paolociccarese.project.dpf.java.core.Stage;
+import info.paolociccarese.project.ld4l.pipeline.commands.ConvertViaRecordCommand;
 import info.paolociccarese.project.ld4l.pipeline.commands.PlaceExtractionCommand;
 import info.paolociccarese.project.ld4l.pipeline.commands.ReadViaRecordCommand;
 import info.paolociccarese.project.ld4l.pipeline.commands.WorkTypesExtractionCommand;
+import info.paolociccarese.project.ld4l.pipeline.commands.WriteViaRecordCommand;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.log4j.ConsoleAppender;
 import org.apache.log4j.Level;
@@ -15,6 +18,9 @@ import org.apache.log4j.Logger;
 import org.apache.log4j.PatternLayout;
 import org.slf4j.LoggerFactory;
 
+/**
+ * @author Dr. Paolo Ciccarese
+ */
 public class ViaRecordConversionPipeline extends APipeline {
 	
 	private final org.slf4j.Logger log = LoggerFactory.getLogger(ViaRecordConversionPipeline.class);
@@ -38,7 +44,12 @@ public class ViaRecordConversionPipeline extends APipeline {
 		initializeLog4j();
 		
 		ViaRecordConversionPipeline pipeline = new ViaRecordConversionPipeline();
-		pipeline.start(new HashMap<String, Object>(), null);
+		
+		Map parameters = new HashMap<String, Object>();
+		// Echoing of the data while flowing in the pipeline
+		parameters.put("echo", "all");
+		
+		pipeline.start(parameters, null);
 	}
 
 	public ViaRecordConversionPipeline() {
@@ -55,6 +66,14 @@ public class ViaRecordConversionPipeline extends APipeline {
 		IStage stage3 = new Stage("3", new PlaceExtractionCommand(this));
 		stage3.setExecutable(true);
 		_stages.add(stage3);
+		
+		IStage stage4 = new Stage("4", new ConvertViaRecordCommand(this));
+		stage4.setExecutable(true);
+		_stages.add(stage4);
+		
+		IStage stage5 = new Stage("5", new WriteViaRecordCommand(this));
+		stage5.setExecutable(true);
+		_stages.add(stage5);
 		
 		log.info("Pipeline definition completed with " + _stages.size() + " stage(s)");
 	}

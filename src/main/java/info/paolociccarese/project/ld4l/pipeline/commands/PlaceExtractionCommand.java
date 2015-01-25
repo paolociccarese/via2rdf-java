@@ -8,6 +8,9 @@ import info.paolociccarese.project.ld4l.conversion.via.IResultsHandler;
 
 import java.util.Map;
 
+/**
+ * @author Dr. Paolo Ciccarese
+ */
 public class PlaceExtractionCommand implements IStageCommand, IResultsHandler {
 
 	private IStage _parentStage;
