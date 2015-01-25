@@ -3,19 +3,23 @@ package info.paolociccarese.project.ld4l.pipeline.commands;
 import info.paolociccarese.project.dpf.java.core.IStage;
 import info.paolociccarese.project.dpf.java.core.IStageCommand;
 import info.paolociccarese.project.dpf.java.core.IStageListener;
-import info.paolociccarese.project.jsondp.java.core.JsonDpAware;
 import info.paolociccarese.project.jsondp.java.core.JsonDpObject;
 import info.paolociccarese.project.ld4l.conversion.via.IResultsHandler;
 
-import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Map;
+
+import org.apache.jena.riot.Lang;
+import org.apache.jena.riot.RDFDataMgr;
+
+import com.hp.hpl.jena.rdf.model.Model;
+import com.hp.hpl.jena.rdf.model.ModelFactory;
 
 /**
  * @author Dr. Paolo Ciccarese
@@ -38,36 +42,22 @@ public class WriteViaRecordCommand implements IStageCommand, IResultsHandler {
 
 		System.out.println(parameters.get("file").toString().replace("data", "output").replace(".xml", ".json"));
 		
-		try {
-			File file1 = new File(parameters.get("file").toString().replace("data", "output").replace(".xml", ".json"));
-			file1.getParentFile().mkdirs();
-			FileOutputStream is1 = new FileOutputStream(file1);
-            OutputStreamWriter osw1 = new OutputStreamWriter(is1);    
-            Writer writer1 = new BufferedWriter(osw1);
-			writer1.write(data.toString());
-			writer1.close();
+
+			Model model = ModelFactory.createDefaultModel();
+			InputStream inputStream = new ByteArrayInputStream(data.toString().getBytes(Charset.forName("UTF-8")));
+			RDFDataMgr.read(model, inputStream, "http://bibframe.org/", Lang.JSONLD);
 			
-			if(data instanceof JsonDpAware) {
-				File file2 = new File(parameters.get("file").toString().replace("data", "output").replace(".xml", "-dp.json"));
-				file2.getParentFile().mkdirs();
-				FileOutputStream is2 = new FileOutputStream(file2);
-	            OutputStreamWriter osw2 = new OutputStreamWriter(is2);    
-	            Writer writer2 = new BufferedWriter(osw2);
-				writer2.write(((JsonDpAware)data).plainJsonWithProvenanceToString());
-				writer2.close();
+			System.out.println(model);
+			
+			OutputStream output;
+			try {
+				output = new FileOutputStream(parameters.get("file").toString().replace("data", "output").replace(".xml", ".rdf"));
+				RDFDataMgr.write(output, model, Lang.RDFXML);
+			} catch (FileNotFoundException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
 			
-			
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
 		
 		// TODO write
 		notifyResult(data);
